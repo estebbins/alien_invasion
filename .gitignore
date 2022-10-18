@@ -1,0 +1,2 @@
+#tell git to ignore the python cache
+__pycache__/
