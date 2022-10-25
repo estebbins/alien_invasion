@@ -6,6 +6,7 @@ from settings import Settings
 from ship import Ship
 from bullet import Bullet
 from mega_bullet import MegaBullet
+from alien import Alien
 
 class AlienInvasion:
     """Overall class to manage game assets and behavior"""
@@ -27,6 +28,9 @@ class AlienInvasion:
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.mega_bullets = pygame.sprite.Group()
+        self.aliens = pygame.sprite.Group()
+
+        self._create_fleet()
 
     def run_game(self):
         """Start the main loop for the game"""
@@ -96,6 +100,29 @@ class AlienInvasion:
             if mega_bullet.rect.bottom <= 0:
                 self.mega_bullets.remove(mega_bullet)
 
+    def _create_fleet(self):
+        """create the fleet of aliens"""
+        #Make an alien
+        alien = Alien(self)
+        self.aliens.add(alien)
+
+    def _create_fleet(self):
+        """create the fleet of aliens"""
+        #Create an alien and find the number of aliens in a row
+        #Spacing between each alien is equal to one alien width
+        alien = Alien(self)
+        alien_width = alien.rect.width
+        available_space_x = self.settings.screen_width - (2 * alien_width)
+        number_aliens_x = available_space_x // (2* alien_width)
+
+        #Create a first row of aliens
+        for alien_number in range(number_aliens_x):
+            #Create an alien and place it in the row
+            alien = Alien(self)
+            alien.x = alien_width + 2 * alien_width * alien_number
+            alien.rect.x = alien.x
+            self.aliens.add(alien)
+
     def _update_screen(self):
         """update images on the screen flip to a new screen"""
         #redraw the screen during each pass through the loop
@@ -105,6 +132,7 @@ class AlienInvasion:
             bullet.draw_bullet()
         for mega_bullet in self.mega_bullets.sprites():
             mega_bullet.draw_mega_bullet()
+        self.aliens.draw(self.screen)
 
         #make the most recently drawn screen visible. 
         pygame.display.flip()
