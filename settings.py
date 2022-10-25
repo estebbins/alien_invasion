@@ -14,7 +14,7 @@ class Settings:
         #Bullet settings
         self.bullet_speed = 1.0
         #image is 12 by 15 instead of 3 by 15
-        self.bullets_allowed = 3
+        self.bullets_allowed = 5
 
         #MegaBullet settings
         self.mega_bullet_speed = 1.5
@@ -26,7 +26,7 @@ class Settings:
         self.fleet_drop_speed = 10
         #fleet direction of 1 represents right; -1 represents left
         self.fleet_direction = 1
-        
+
     
 
 
