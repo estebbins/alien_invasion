@@ -1,8 +1,10 @@
 import sys
+from time import sleep
 
 import pygame
 
 from settings import Settings
+from game_stats import GameStats
 from ship import Ship
 from bullet import Bullet
 from mega_bullet import MegaBullet
@@ -25,6 +27,9 @@ class AlienInvasion:
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
 
+        #create an istance to store game statistics
+        self.stats = GameStats(self)
+
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.mega_bullets = pygame.sprite.Group()
@@ -40,9 +45,11 @@ class AlienInvasion:
             #which returns a list of events that have taken place since the
             #last time the fucntion was called
             self._check_events()
-            self.ship.update()
-            self._update_bullets()
-            self._update_aliens()
+            if self.stats.game_active:
+                self.ship.update()
+                self._update_bullets()
+                self._update_aliens()
+
             self._update_screen()
 
     def _check_events(self):
@@ -132,6 +139,50 @@ class AlienInvasion:
             alien.rect.y += self.settings.fleet_drop_speed
         self.settings.fleet_direction *= -1
 
+    def _check_bullet_alien_collisions(self):
+        """respond to bullet-alien collisions"""
+        #check for bullets that have hit aliens
+        #if so, get rid of the bullet and alien
+        collisions = pygame.sprite.groupcollide(
+            self.bullets, self.aliens, True, True)
+        collisions_mega = pygame.sprite.groupcollide(
+            self.mega_bullets, self.aliens, False, True)
+
+        if not self.aliens:
+            #Destroy existing bullets and create new fleet
+            self.bullets.empty()
+            self.mega_bullets.empty()
+            self._create_fleet()
+
+    def _ship_hit(self):
+        """Respond to the shit being hit by an alien"""
+        if self.stats.ships_left > 0:
+            #Decrement ships_left
+            self.stats.ships_left -= 1
+
+            #get rid of any remaining aliens and bullets
+            self.aliens.empty()
+            self.bullets.empty()
+            self.mega_bullets.empty()
+
+            #create a new fleet and center the ship
+            self._create_fleet()
+            self.ship.center_ship()
+
+            #pause
+            sleep(0.5)
+        else:
+            self.stats.game_active = False
+
+    def _check_aliens_bottom(self):
+        """check if any aliens have reached the bottom of the screen."""
+        screen_rect = self.screen.get_rect()
+        for alien in self.aliens.sprites():
+            if alien.rect.bottom >= screen_rect.bottom:
+            #treat this the same as if the ship got hit
+                self._ship_hit()
+                break
+
     def _update_screen(self):
         """update images on the screen flip to a new screen"""
         #redraw the screen during each pass through the loop
@@ -160,21 +211,6 @@ class AlienInvasion:
 
         self._check_bullet_alien_collisions()
 
-    def _check_bullet_alien_collisions(self):
-        """respond to bullet-alien collisions"""
-        #check for bullets that have hit aliens
-        #if so, get rid of the bullet and alien
-        collisions = pygame.sprite.groupcollide(
-            self.bullets, self.aliens, True, True)
-        collisions_mega = pygame.sprite.groupcollide(
-            self.mega_bullets, self.aliens, False, True)
-
-        if not self.aliens:
-            #Destroy existing bullets and create new fleet
-            self.bullets.empty()
-            self.mega_bullets.empty()
-            self._create_fleet()
-
     def _update_aliens(self):
         """
         check if fleet is at an edge, 
@@ -182,6 +218,13 @@ class AlienInvasion:
         """
         self._check_fleet_edges()
         self.aliens.update()
+
+        #look for alien ship collisions
+        if pygame.sprite.spritecollideany(self.ship, self.aliens):
+            self._ship_hit()
+
+        #look for aliens hitting the bottom of the screen
+        self._check_aliens_bottom()
 
 
 if __name__ == '__main__':
