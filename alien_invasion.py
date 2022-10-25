@@ -89,26 +89,6 @@ class AlienInvasion:
                 new_mega_bullet = MegaBullet(self)
                 self.mega_bullets.add(new_mega_bullet)
 
-    def _update_bullets(self):
-        """update position of bullets and get rid of old bullets"""
-        self.bullets.update()
-        self.mega_bullets.update()
-        #get rid of bullets that have disappeared
-        for bullet in self.bullets.copy():
-            if bullet.rect.bottom <= 0:
-                self.bullets.remove(bullet)
-        for mega_bullet in self.mega_bullets.copy():
-            if mega_bullet.rect.bottom <= 0:
-                self.mega_bullets.remove(mega_bullet)
-
-    def _update_aliens(self):
-        """
-        check if fleet is at an edge, 
-        then update the positions of all aliens in the fleet
-        """
-        self._check_fleet_edges()
-        self.aliens.update()
-
     def _create_fleet(self):
         """create the fleet of aliens"""
         #Create an alien and find the number of aliens in a row
@@ -165,6 +145,42 @@ class AlienInvasion:
 
         #make the most recently drawn screen visible. 
         pygame.display.flip()
+
+    def _update_bullets(self):
+        """update position of bullets and get rid of old bullets"""
+        self.bullets.update()
+        self.mega_bullets.update()
+        #get rid of bullets that have disappeared
+        for bullet in self.bullets.copy():
+            if bullet.rect.bottom <= 0:
+                self.bullets.remove(bullet)
+        for mega_bullet in self.mega_bullets.copy():
+            if mega_bullet.rect.bottom <= 0:
+                self.mega_bullets.remove(mega_bullet)
+
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        """respond to bullet-alien collisions"""
+        #check for bullets that have hit aliens
+        #if so, get rid of the bullet and alien
+        collisions = pygame.sprite.groupcollide(
+            self.bullets, self.aliens, True, True)
+        collisions_mega = pygame.sprite.groupcollide(
+            self.mega_bullets, self.aliens, False, True)
+
+        if not self.aliens:
+            #Destroy existing bullets and create new fleet
+            self.bullets.empty()
+            seld._create_fleet()
+
+    def _update_aliens(self):
+        """
+        check if fleet is at an edge, 
+        then update the positions of all aliens in the fleet
+        """
+        self._check_fleet_edges()
+        self.aliens.update()
 
 
 if __name__ == '__main__':
