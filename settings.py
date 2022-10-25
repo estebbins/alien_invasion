@@ -10,4 +10,16 @@ class Settings:
 
         #Ship settings
         self.ship_speed = 1.5
-        
+
+        #Bullet settings
+        self.bullet_speed = 1.0
+        #image is 12 by 15 instead of 3 by 15
+        self.bullets_allowed = 3
+
+        #MegaBullet settings
+        self.mega_bullet_speed = 1.5
+        #image is 48 by 60
+        self.mega_bullets_allowed = 1
+    
+
+
