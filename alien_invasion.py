@@ -100,6 +100,7 @@ class AlienInvasion:
 
     def _start_game(self):
         #reset game statistics
+        self.settings.initialize_dynamic_settings()
         self.stats.reset_stats()
         self.stats.game_active = True
 
@@ -185,6 +186,7 @@ class AlienInvasion:
             self.bullets.empty()
             self.mega_bullets.empty()
             self._create_fleet()
+            self.settings.increase_speed()
 
     def _ship_hit(self):
         """Respond to the shit being hit by an alien"""
