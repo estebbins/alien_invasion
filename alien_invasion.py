@@ -3,6 +3,8 @@ from time import sleep
 
 import pygame
 
+import json
+
 from settings import Settings
 from game_stats import GameStats
 from scoreboard import Scoreboard
@@ -63,7 +65,7 @@ class AlienInvasion:
         """Respond to keypresses and mouse events"""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                sys.exit()
+                self._close_game()
             elif event.type == pygame.KEYDOWN:
                 self._check_keydown_events(event)
             elif event.type == pygame.KEYUP:
@@ -80,7 +82,7 @@ class AlienInvasion:
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
-            sys.exit()
+            self._close_game()
         elif event.key == pygame.K_SPACE:
             self._fire_bullet()
         elif event.key == pygame.K_m:
@@ -107,6 +109,8 @@ class AlienInvasion:
         self.stats.reset_stats()
         self.stats.game_active = True
         self.sb.prep_score()
+        self.sb.prep_level()
+        self.sb.prep_ships()
 
         #get rid of any remaining aliens and bullets
         self.aliens.empty()
@@ -119,6 +123,15 @@ class AlienInvasion:
 
         #hide mouse cursor
         pygame.mouse.set_visible(False)
+
+    def _close_game(self):
+        """Save high score and exit."""
+        saved_high_score = self.stats.get_saved_high_score()
+        if self.stats.high_score > saved_high_score:
+            with open('high_score.json', 'w') as f:
+                json.dump(self.stats.high_score, f)
+        
+        sys.exit()
 
     def _fire_bullet(self):
         """create a new bullet and add it to the bullets group"""
@@ -189,11 +202,13 @@ class AlienInvasion:
             for aliens in collisions.values():
                 self.stats.score += self.settings.alien_points * len(aliens)
             self.sb.prep_score()
+            self.sb.check_high_score()
 
         if collisions_mega:
             for aliens in collisions_mega.values():
                 self.stats.score += (self.settings.alien_points * 1.5) * len(aliens)
             self.sb.prep_score()
+            self.sb.check_high_score()
 
         if not self.aliens:
             #Destroy existing bullets and create new fleet
@@ -202,11 +217,16 @@ class AlienInvasion:
             self._create_fleet()
             self.settings.increase_speed()
 
+            #increase level
+            self.stats.level += 1
+            self.sb.prep_level()
+
     def _ship_hit(self):
         """Respond to the shit being hit by an alien"""
         if self.stats.ships_left > 0:
             #Decrement ships_left
             self.stats.ships_left -= 1
+            self.sb.prep_ships()
 
             #get rid of any remaining aliens and bullets
             self.aliens.empty()
