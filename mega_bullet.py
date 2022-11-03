@@ -9,7 +9,7 @@ class MegaBullet(Sprite):
         self.screen = ai_game.screen
         self.settings = ai_game.settings
         #import bullet image
-        self.image = pygame.image.load('images/mega_bullet.bmp')
+        self.image = pygame.image.load('/Users/emilystebbins/Desktop/alien_invasion/images/mega_bullet.bmp')
 
         #createa  bullet rect at (0, 0) and then set correct position
         self.rect = pygame.Rect(0,0, 24, 60)

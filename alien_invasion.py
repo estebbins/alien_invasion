@@ -31,7 +31,7 @@ class AlienInvasion:
         self.settings.screen_height = self.screen.get_rect().height
         pygame.display.set_caption("Alien Invasion")
 
-        #create an istance to store game statistics
+        #create an instance to store game statistics
         #and create scoreboard
         self.stats = GameStats(self)
         self.sb = Scoreboard(self)
@@ -45,6 +45,8 @@ class AlienInvasion:
 
         #make the play button
         self.play_button = Button(self, "Play")
+        self.resume_button = Button(self, "Resume")
+        self.paused = False
 
     def run_game(self):
         """Start the main loop for the game"""
@@ -72,7 +74,9 @@ class AlienInvasion:
                 self._check_keyup_events(event)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mouse_pos = pygame.mouse.get_pos()
+                self._check_resume_button(mouse_pos)
                 self._check_play_button(mouse_pos)
+
 
     def _check_keydown_events(self, event):
         """respond to keypresses"""
@@ -83,12 +87,18 @@ class AlienInvasion:
             self.ship.moving_left = True
         elif event.key == pygame.K_q:
             self._close_game()
-        elif event.key == pygame.K_SPACE:
+        elif event.key == pygame.K_SPACE and self.stats.game_active:
             self._fire_bullet()
-        elif event.key == pygame.K_m:
+        elif event.key == pygame.K_m and self.stats.game_active:
             self._fire_mega_bullet()
-        elif event.key == pygame.K_p:
+        elif event.key == pygame.K_RETURN:
             self._start_game()
+        elif event.key == pygame.K_p and self.stats.game_active:
+            self.paused = True
+            self._pause()
+        elif event.key == pygame.K_r and self.paused:
+            self.paused = False
+            self.stats.game_active = True
 
     def _check_keyup_events(self, event):
         """respond to key releases"""
@@ -96,6 +106,13 @@ class AlienInvasion:
             self.ship.moving_right = False
         elif event.key == pygame.K_LEFT:
             self.ship.moving_left = False
+
+    def _check_resume_button(self, mouse_pos):
+        """resume when the player clicks resume"""
+        button_clicked = self.resume_button.rect.collidepoint(mouse_pos)
+        if button_clicked:
+            self.paused = False
+            self.stats.game_active = True
 
     def _check_play_button(self, mouse_pos):
         """start a new game when the player clicks Play"""
@@ -108,6 +125,7 @@ class AlienInvasion:
         self.settings.initialize_dynamic_settings()
         self.stats.reset_stats()
         self.stats.game_active = True
+        self.paused = False
         self.sb.prep_score()
         self.sb.prep_level()
         self.sb.prep_ships()
@@ -132,6 +150,12 @@ class AlienInvasion:
                 json.dump(self.stats.high_score, f)
         
         sys.exit()
+
+    def _pause(self):
+        if self.paused:
+            self.stats.game_active = False
+            pygame.mouse.set_visible(True)
+        pygame.display.flip()
 
     def _fire_bullet(self):
         """create a new bullet and add it to the bullets group"""
@@ -266,8 +290,11 @@ class AlienInvasion:
         #draw the score info
         self.sb.show_score()
 
-        #draw the play button if the game is inactive
-        if not self.stats.game_active:
+        #draw the play button if the game is inactive but not paused
+        if self.paused:
+            self.resume_button.draw_button()
+
+        if not self.paused and not self.stats.game_active:
             self.play_button.draw_button()
 
         #make the most recently drawn screen visible. 
