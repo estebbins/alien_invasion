@@ -12,6 +12,7 @@ class GameStats:
 
         #High score should never be reset.
         self.high_score = self.get_saved_high_score()
+        self.high_level = self.get_saved_high_level()
 
     def get_saved_high_score(self):
         """gets high score from file if it exists"""
@@ -20,6 +21,14 @@ class GameStats:
                 return json.load(f)
         except FileNotFoundError:
             return 0
+
+    def get_saved_high_level(self):
+        """gets high level from file if it exists"""
+        try:
+            with open('high_level.json') as f:
+                return json.load(f)
+        except FileNotFoundError:
+            return 1
 
     def reset_stats(self):
         """initialize statistics that can change during the game"""

@@ -148,6 +148,11 @@ class AlienInvasion:
         if self.stats.high_score > saved_high_score:
             with open('high_score.json', 'w') as f:
                 json.dump(self.stats.high_score, f)
+
+        saved_high_level = self.stats.get_saved_high_level()
+        if self.stats.high_level > saved_high_level:
+            with open('high_level.json', 'w') as f:
+                json.dump(self.stats.high_level, f)
         
         sys.exit()
 
@@ -244,6 +249,7 @@ class AlienInvasion:
             #increase level
             self.stats.level += 1
             self.sb.prep_level()
+            self.sb.check_high_level()
 
     def _ship_hit(self):
         """Respond to the shit being hit by an alien"""
