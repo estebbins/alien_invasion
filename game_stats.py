@@ -28,7 +28,7 @@ class GameStats:
             with open('high_level.json') as f:
                 return json.load(f)
         except FileNotFoundError:
-            return 1
+            return 0
 
     def reset_stats(self):
         """initialize statistics that can change during the game"""

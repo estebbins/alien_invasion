@@ -94,7 +94,7 @@ class Scoreboard:
 
     def check_high_level(self):
         """check to see if there's a new high level"""
-        if self.stats.level >= self.stats.high_level:
-            self.stats.high_level = self.stats.level
+        if self.stats.level-1 > self.stats.high_level:
+            self.stats.high_level = self.stats.level-1
             self.prep_high_level()
 

@@ -248,6 +248,10 @@ class AlienInvasion:
 
             #increase level
             self.stats.level += 1
+            if self.stats.level % 10 == 0 and \
+                self.stats.ships_left < self.settings.ship_limit:
+                self.stats.ships_left += 1
+                self.sb.prep_ships()
             self.sb.prep_level()
             self.sb.check_high_level()
 
